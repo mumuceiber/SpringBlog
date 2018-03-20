@@ -1,5 +1,3 @@
-# SpringBlog
-
 SpringBlog
 =====
 
