@@ -18,8 +18,6 @@ $(function() {
         },
         resize:'vertical',
         localStorage:'md',
-        imgurl: 'http://localhost:8081',
-        base64url: 'http://localhost:8081'
     });
   
     // 初始化标签控件
@@ -36,7 +34,7 @@ $(function() {
  
  	$("#uploadImage").click(function() {
 		$.ajax({
-		    url: 'http://localhost:8081/upload',
+		    url: fileServerUrl,
 		    type: 'POST',
 		    cache: false,
 		    data: new FormData($('#uploadformid')[0]),

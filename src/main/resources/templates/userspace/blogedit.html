@@ -25,13 +25,14 @@
 
             <!-- Blog Post -->
             <div class="card mb-4">
-                <div class="card-block">
-                    <input  type="text" class="form-control" placeholder="请填写博客标题" value="" maxlength="50">
+                <div class="card-block" th:object="${blogModel.blog}">
+                    <input type="hidden" name="id" th:value="*{id}">
+                    <input  type="text" class="form-control" placeholder="Title"  id="title" name="title"  th:value="*{title}"  maxlength="50">
 
-                    <textarea class="blog-textarea" placeholder="请填写博客摘要" value="" maxlength="300"></textarea>
+                    <textarea class="blog-textarea" placeholder="Summary"  id="summary" name="summary"  th:text="*{summary}" maxlength="300"></textarea>
 
                     <hr>
-                    <textarea id="md" data-provide="markdown" data-hidden-buttons="cmdImage"  ></textarea>
+                    <textarea id="md" data-provide="markdown" data-hidden-buttons="cmdImage" name="content"  th:text="*{content}"></textarea>
 
                     <hr>
                 </div>
@@ -71,6 +72,34 @@
 
                 </div>
 
+                <!-- 图片上传 -->
+                <div class="card ">
+                    <h5 class="card-header"><i class="fa fa-cog" aria-hidden="true"></i> 博客设置</h5>
+                    <div class="card-block">
+                        <div class="row mt-1">
+                            <div  class="col-lg-12">
+                                Tag： 					<input type="text" class="form-control form-control-tag">
+                            </div>
+                        </div>
+                        <div class="row mt-1">
+                            <div  class="col-lg-12">
+                                Category：				<select id="single" class="form-control form-control-chosen" data-placeholder="请选择">
+                                <option>Java</option>
+                                <option>分布式</option>
+                                <option>数据库</option>
+                            </select>
+                            </div>
+                        </div>
+                        <div class="row mt-1">
+                            <div  class="col-lg-12">
+                                <button class="btn btn-primary float-right" id="submitBlog"  th:attr="userName=${#authentication.name}">Post</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
 
             </div>
         </div>
@@ -83,9 +112,12 @@
 
 
 <div th:replace="~{fragments/footer :: footer}">...</div>
- 
 
-<script src="../../js/blogedit.js" th:src="@{/js/blogedit.js}"></script>
+<script th:inline="javascript">
+    var fileServerUrl = [[${blogModel.fileServerUrl}]];
+</script>
+
+<script src="../../js/userspace/blogedit.js" th:src="@{/js/userspace/blogedit.js}"></script>
  
 </body>
 </html>
