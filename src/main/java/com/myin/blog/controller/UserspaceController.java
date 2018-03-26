@@ -2,6 +2,7 @@ package com.myin.blog.controller;
 
 import com.myin.blog.domain.Blog;
 import com.myin.blog.domain.User;
+import com.myin.blog.domain.Vote;
 import com.myin.blog.service.BlogService;
 import com.myin.blog.service.UserService;
 import com.myin.blog.util.ConstraintViolationExceptionHandler;
@@ -101,7 +102,7 @@ public class UserspaceController {
     public String listBlogByOrder(@PathVariable("username") String username,
                                   @RequestParam(value="order", required = false, defaultValue = "new") String order,
                                   @RequestParam(value="category", required = false) Long category,
-                                  @RequestParam(value="keyword", required = false) String keyword,
+                                  @RequestParam(value="keyword", required = false, defaultValue="") String keyword,
                                   @RequestParam(value="async", required = false) boolean async,
                                   @RequestParam(value="pageIndex", required = false, defaultValue = "0") int pageIndex,
                                   @RequestParam(value="pageSize", required = false, defaultValue = "10") int pageSize,
@@ -113,7 +114,7 @@ public class UserspaceController {
         if (category != null) {
             System.out.println("Category:   " + category);
             System.out.println("Selflink: " + "redirect:/u/" + username + "/blogs?category=" + category);
-            return "/u";
+            return "u";
         }
 
         Page<Blog> page = null;
@@ -129,17 +130,20 @@ public class UserspaceController {
         }
 
         List<Blog> list = page.getContent();
+        System.out.println("+++++++++++++++++++++++++++" + list.size());
 
         model.addAttribute("order", order);
         model.addAttribute("page", page);
         model.addAttribute("blogList", list);
-        return (async == true ? "/userspace/u :: #mainContainerRepleace" : "/userspace/u");
+        return (async == true ? "userspace/u :: #mainContainerRepleace" : "userspace/u");
     }
 
     @GetMapping("/{username}/blogs/{id}")
     public String listBlogsByOrder(@PathVariable("username") String username,
                                    @PathVariable("id") Long id, Model model) {
 
+        Blog blog = blogService.getBlogById(id);
+        User principal = null;
         // increase reading size each receiving request
         blogService.readingIncrease(id);
 
@@ -150,16 +154,28 @@ public class UserspaceController {
                 && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()
                 && !SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString().equals("anonymouseUser")) {
 
-            User principal = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            principal = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (principal != null && username.equals(principal.getName())) {
                 isBlogOwner = true;
             }
         }
 
+        List<Vote> votes = blog.getVotes();
+        Vote currentVote = null;
+        if (principal != null) {
+            for (Vote vote : votes) {
+                if (vote.getUser().getId() == principal.getId()) {
+                    currentVote = vote;
+                    break;
+                }
+            }
+        }
+
+        model.addAttribute("currentVote", currentVote);
         model.addAttribute("isBlogOwner", isBlogOwner);
         model.addAttribute("blogModel", blogService.getBlogById(id));
 
-        return "/userspace/blog";
+        return "userspace/blog";
     }
 
     @DeleteMapping("/{username}/blogs/{id}")

@@ -34,7 +34,7 @@ $(function() {
  
  	$("#uploadImage").click(function() {
 		$.ajax({
-		    url: fileServerUrl,
+		    url: 'http://localhost:8081/upload',
 		    type: 'POST',
 		    cache: false,
 		    data: new FormData($('#uploadformid')[0]),

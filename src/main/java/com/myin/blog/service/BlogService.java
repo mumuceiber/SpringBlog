@@ -2,6 +2,7 @@ package com.myin.blog.service;
 
 import com.myin.blog.domain.Blog;
 import com.myin.blog.domain.User;
+import com.myin.blog.domain.Vote;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,4 +21,12 @@ public interface BlogService {
     Page<Blog> listBlogsByTitleLikeAndSort(User user, String title, Pageable pageable);
 
     void readingIncrease(Long id);
+
+    Blog createComment(Long blogId, String commentContent);
+
+    void removeComment(Long blogId, Long commentId);
+
+    Vote createVote(Long blogId);
+
+    void removeVote(Long blogId, Long voteId);
 }
