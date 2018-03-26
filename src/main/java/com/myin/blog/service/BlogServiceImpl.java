@@ -1,9 +1,6 @@
 package com.myin.blog.service;
 
-import com.myin.blog.domain.Blog;
-import com.myin.blog.domain.Comment;
-import com.myin.blog.domain.User;
-import com.myin.blog.domain.Vote;
+import com.myin.blog.domain.*;
 import com.myin.blog.repository.BlogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,6 +47,12 @@ public class BlogServiceImpl implements BlogService{
         // 模糊查询
         title = "%" + title + "%";
         Page<Blog> blogs = blogRepository.findByUserAndTitleLike(user, title, pageable);
+        return blogs;
+    }
+
+    @Override
+    public Page<Blog> listBlogsByCatalog(Catalog catalog, Pageable pageable) {
+        Page<Blog> blogs = blogRepository.findByCatalog(catalog, pageable);
         return blogs;
     }
 

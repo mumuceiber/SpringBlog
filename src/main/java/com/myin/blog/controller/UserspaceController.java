@@ -1,9 +1,11 @@
 package com.myin.blog.controller;
 
 import com.myin.blog.domain.Blog;
+import com.myin.blog.domain.Catalog;
 import com.myin.blog.domain.User;
 import com.myin.blog.domain.Vote;
 import com.myin.blog.service.BlogService;
+import com.myin.blog.service.CatalogService;
 import com.myin.blog.service.UserService;
 import com.myin.blog.util.ConstraintViolationExceptionHandler;
 import com.myin.blog.vo.Response;
@@ -40,6 +42,9 @@ public class UserspaceController {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private CatalogService catalogService;
 
     @Value("${file.server.url}")
     private String fileServerUrl;
@@ -101,7 +106,7 @@ public class UserspaceController {
     @GetMapping("/{username}/blogs")
     public String listBlogByOrder(@PathVariable("username") String username,
                                   @RequestParam(value="order", required = false, defaultValue = "new") String order,
-                                  @RequestParam(value="category", required = false) Long category,
+                                  @RequestParam(value="catalog", required = false) Long catalogId,
                                   @RequestParam(value="keyword", required = false, defaultValue="") String keyword,
                                   @RequestParam(value="async", required = false) boolean async,
                                   @RequestParam(value="pageIndex", required = false, defaultValue = "0") int pageIndex,
@@ -110,21 +115,18 @@ public class UserspaceController {
 
         User user = (User)userDetailsService.loadUserByUsername(username);
         model.addAttribute("user", user);
-
-        if (category != null) {
-            System.out.println("Category:   " + category);
-            System.out.println("Selflink: " + "redirect:/u/" + username + "/blogs?category=" + category);
-            return "u";
-        }
-
         Page<Blog> page = null;
-        if (order.equals("hot")) {
+
+        if (catalogId != null) {
+            Catalog catalog = catalogService.getCatalogById(catalogId);
+            Pageable pageable = new PageRequest(pageIndex, pageSize);
+            page = blogService.listBlogsByCatalog(catalog, pageable);
+            order = "";
+        } else if (order.equals("hot")) {
             Sort sort = new Sort(Sort.Direction.DESC, "reading", "comments", "like");
             Pageable pageable = new PageRequest(pageIndex, pageSize, sort);
             page = blogService.listBlogsByTitleLikeAndSort(user, keyword, pageable);
-        }
-
-        if (order.equals("new")) {
+        } else if (order.equals("new")) {
             Pageable pageable = new PageRequest(pageIndex, pageSize);
             page = blogService.listBlogsByTitleLike(user, keyword, pageable);
         }
@@ -133,6 +135,7 @@ public class UserspaceController {
         System.out.println("+++++++++++++++++++++++++++" + list.size());
 
         model.addAttribute("order", order);
+        model.addAttribute("catalogId", catalogId);
         model.addAttribute("page", page);
         model.addAttribute("blogList", list);
         return (async == true ? "userspace/u :: #mainContainerRepleace" : "userspace/u");
@@ -193,25 +196,48 @@ public class UserspaceController {
     }
 
     @GetMapping("/{username}/blogs/edit")
-    public ModelAndView createBlog(Model model) {
+    public ModelAndView createBlog(@PathVariable("username") String username, Model model) {
+        User user = (User) userDetailsService.loadUserByUsername(username);
+        List<Catalog> catalogs = catalogService.listCatalogs(user);
+
         model.addAttribute("blog", new Blog(null, null, null));
+        model.addAttribute("catalogs", catalogs);
         return new ModelAndView("userspace/blogedit", "blogModel", model);
     }
 
     @GetMapping("/{username}/blogs/edit/{id}")
     public ModelAndView editBlog(@PathVariable("username") String username,@PathVariable("id") Long id, Model model) {
+        User user = (User)userDetailsService.loadUserByUsername(username);
+        List<Catalog> catalogs = catalogService.listCatalogs(user);
+
         model.addAttribute("blog", blogService.getBlogById(id));
+        model.addAttribute("catalogs", catalogs);
         return new ModelAndView("userspace/blogedit", "blogModel", model);
     }
 
     @PostMapping("/{username}/blogs/edit")
     @PreAuthorize("authentication.name.equals(#username)")
     public ResponseEntity<Response> saveBlog(@PathVariable("username") String username, @RequestBody Blog blog) {
-        User user = (User)userDetailsService.loadUserByUsername(username);
-        blog.setUser(user);
+        // check if catalog is empty
+        if (blog.getCatalog().getId() == null) {
+            return ResponseEntity.ok().body(new Response(false, "no category"));
+        }
+
         try {
-            blogService.saveBlog(blog);
-        } catch (ConstraintViolationException e)  {
+            // check it is for create blog or for edit existing blog
+            if (blog.getId() != null) {
+                Blog originalBlog = blogService.getBlogById(blog.getId());
+                originalBlog.setTitle(blog.getTitle());
+                originalBlog.setContent(blog.getContent());
+                originalBlog.setSummary(blog.getSummary());
+                originalBlog.setCatalog(blog.getCatalog());
+                blogService.saveBlog(originalBlog);
+            } else {
+                User user = (User)userDetailsService.loadUserByUsername(username);
+                blog.setUser(user);
+                blogService.saveBlog(blog);
+            }
+        } catch (ConstraintViolationException e) {
             return ResponseEntity.ok().body(new Response(false, ConstraintViolationExceptionHandler.getMessage(e)));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new Response(false, e.getMessage()));

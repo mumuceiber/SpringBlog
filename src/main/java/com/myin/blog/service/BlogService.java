@@ -1,6 +1,7 @@
 package com.myin.blog.service;
 
 import com.myin.blog.domain.Blog;
+import com.myin.blog.domain.Catalog;
 import com.myin.blog.domain.User;
 import com.myin.blog.domain.Vote;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,8 @@ public interface BlogService {
     Page<Blog> listBlogsByTitleLike(User user, String title, Pageable pageable);
 
     Page<Blog> listBlogsByTitleLikeAndSort(User user, String title, Pageable pageable);
+
+    Page<Blog> listBlogsByCatalog(Catalog catalog, Pageable pageable);
 
     void readingIncrease(Long id);
 
