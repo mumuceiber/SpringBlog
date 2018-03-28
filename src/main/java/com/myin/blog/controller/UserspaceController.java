@@ -219,7 +219,7 @@ public class UserspaceController {
     @PreAuthorize("authentication.name.equals(#username)")
     public ResponseEntity<Response> saveBlog(@PathVariable("username") String username, @RequestBody Blog blog) {
         // check if catalog is empty
-        if (blog.getCatalog().getId() == null) {
+        if (blog.getCatalog() == null || blog.getCatalog().getId() == null) {
             return ResponseEntity.ok().body(new Response(false, "no category"));
         }
 
@@ -230,9 +230,11 @@ public class UserspaceController {
                 originalBlog.setTitle(blog.getTitle());
                 originalBlog.setContent(blog.getContent());
                 originalBlog.setSummary(blog.getSummary());
+                originalBlog.setTags(blog.getTags());
                 originalBlog.setCatalog(blog.getCatalog());
                 blogService.saveBlog(originalBlog);
             } else {
+                System.out.println("++++++++++++++++++ " + blog.getTags());
                 User user = (User)userDetailsService.loadUserByUsername(username);
                 blog.setUser(user);
                 blogService.saveBlog(blog);

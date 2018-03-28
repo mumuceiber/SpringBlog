@@ -17,7 +17,7 @@ public class CatalogServiceImpl implements CatalogService{
     @Override
     public Catalog saveCatalog(Catalog catalog) {
         List<Catalog> list = catalogRepository.findByUserAndName(catalog.getUser(), catalog.getName());
-        if (list != null || list.size() > 0) {
+        if (list != null && list.size() > 0) {
             throw new IllegalArgumentException("The catalog already exist");
         }
         return catalogRepository.save(catalog);

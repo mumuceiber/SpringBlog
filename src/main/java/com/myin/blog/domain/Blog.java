@@ -81,6 +81,9 @@ public class Blog implements Serializable {
     @JoinColumn(name="catalog_id")
     private Catalog catalog;
 
+    @Column(name="tags", length = 300)
+    private String tags;
+
 
     protected Blog() {
         // TODO Auto-generated constructor stub
@@ -219,5 +222,13 @@ public class Blog implements Serializable {
 
     public void setCatalog(Catalog catalog) {
         this.catalog = catalog;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 }

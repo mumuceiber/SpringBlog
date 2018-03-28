@@ -35,6 +35,24 @@ public class BlogServiceImpl implements BlogService{
     }
 
     @Override
+    public Page<Blog> listBlogsByTitleVote(User user, String title, Pageable pageable) {
+        // 模糊查询
+        title = "%" + title + "%";
+        //Page<Blog> blogs = blogRepository.findByUserAndTitleLikeOrderByCreateTimeDesc(user, title, pageable);
+        String tags = title;
+        Page<Blog> blogs = blogRepository.findByTitleLikeAndUserOrTagsLikeAndUserOrderByCreateTimeDesc(title,user, tags,user, pageable);
+        return blogs;
+    }
+
+    @Override
+    public Page<Blog> listBlogsByTitleVoteAndSort(User user, String title, Pageable pageable) {
+        // 模糊查询
+        title = "%" + title + "%";
+        Page<Blog> blogs = blogRepository.findByUserAndTitleLike(user, title, pageable);
+        return blogs;
+    }
+
+    @Override
     public Page<Blog> listBlogsByTitleLike(User user, String title, Pageable pageable) {
         // 模糊查询
         title = "%" + title + "%";

@@ -42,7 +42,7 @@ public class CatalogController {
                 isOwner = true;
             }
         }
-        model.addAttribute("isCatalogOwner", isOwner);
+        model.addAttribute("isCatalogsOwner", isOwner);
         model.addAttribute("catalogs", catalogs);
         return "userspace/u :: #catalogRepleace";
     }
@@ -58,12 +58,13 @@ public class CatalogController {
         try {
             catalog.setUser(user);
             catalogService.saveCatalog(catalog);
-        } catch (ConstraintViolationException e){
+        } catch (ConstraintViolationException e)  {
             return ResponseEntity.ok().body(new Response(false, ConstraintViolationExceptionHandler.getMessage(e)));
         } catch (Exception e) {
             return ResponseEntity.ok().body(new Response(false, e.getMessage()));
         }
-        return ResponseEntity.ok().body(new Response(true, "sccess", null));
+
+        return ResponseEntity.ok().body(new Response(true, "Success", null));
     }
 
     @DeleteMapping("/{id}")

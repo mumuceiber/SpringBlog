@@ -9,7 +9,7 @@
 
 // DOM 加载完再执行
 $(function() {
-	
+
 	// 初始化 md 编辑器
     $("#md").markdown({
         language: 'zh',
@@ -19,7 +19,7 @@ $(function() {
         resize:'vertical',
         localStorage:'md',
     });
-  
+
     // 初始化标签控件
     $('.form-control-tag').tagEditor({
         initialTags: [],
@@ -29,9 +29,9 @@ $(function() {
         animateDelete: 0,
         placeholder: '请输入标签'
     });
-    
+
     $('.form-control-chosen').chosen();
- 
+
  	$("#uploadImage").click(function() {
 		$.ajax({
 		    url: 'http://localhost:8081/upload',
@@ -43,30 +43,33 @@ $(function() {
 		    success: function(data){
 		    	var mdcontent=$("#md").val();
 		    	 $("#md").val(mdcontent + "\n![]("+data +") \n");
- 
+
 	         }
 		}).done(function(res) {
 			$('#file').val('');
 		}).fail(function(res) {});
  	})
- 
+
  	// 发布博客
  	$("#submitBlog").click(function() {
- 
-		// 获取 CSRF Token 
+
+		// 获取 CSRF Token
 		var csrfToken = $("meta[name='_csrf']").attr("content");
 		var csrfHeader = $("meta[name='_csrf_header']").attr("content");
-		
+
 		$.ajax({
 		    url: '/u/'+ $(this).attr("userName") + '/blogs/edit',
 		    type: 'POST',
 			contentType: "application/json; charset=utf-8",
-		    data:JSON.stringify({"id":Number($('#id').val()), 
-		    	"title": $('#title').val(), 
-		    	"summary": $('#summary').val() , 
-		    	"content": $('#md').val()}),
+            data:JSON.stringify({"id":$('#blogId').val(),
+                "title": $('#title').val(),
+                "summary": $('#summary').val() ,
+                "content": $('#md').val(),
+                "catalog":{"id":$('#catalogSelect').val()},
+                "tags":$('.form-control-tag').val()
+            }),
 			beforeSend: function(request) {
-			    request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token 
+			    request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
 			},
 			 success: function(data){
 				 if (data.success) {
@@ -75,12 +78,12 @@ $(function() {
 				 } else {
 					 toastr.error("error!"+data.message);
 				 }
-				 
+
 		     },
 		     error : function() {
 		    	 toastr.error("error!");
 		     }
 		})
  	})
- 	
+
 });

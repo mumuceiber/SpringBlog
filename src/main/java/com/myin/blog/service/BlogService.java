@@ -17,6 +17,10 @@ public interface BlogService {
 
     Blog getBlogById(Long id);
 
+    Page<Blog> listBlogsByTitleVote(User user, String title, Pageable pageable);
+
+    Page<Blog> listBlogsByTitleVoteAndSort(User user, String title, Pageable pageable);
+
     Page<Blog> listBlogsByTitleLike(User user, String title, Pageable pageable);
 
     Page<Blog> listBlogsByTitleLikeAndSort(User user, String title, Pageable pageable);
