@@ -93,5 +93,4 @@ bower install
 - [ ] Markdown preview while editing
 - [ ] Html editor
 
-## License
-Modified BSD license. Copyright (c) 2015 - 2018, Jiankun LEI (Raysmond).
+
